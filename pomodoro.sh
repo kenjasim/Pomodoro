@@ -1,4 +1,10 @@
 #!/bin/bash
+########################################################
+# Run a work session with pomodoro
+# Author: Kenan Jasim
+########################################################
+
+# Check if all the vars have been put in
 if [ $# -ne 4 ]; then
     echo "Start a pomodoro timer"
     echo ""
@@ -11,21 +17,32 @@ work=$(($2 * 60))
 short_break=$(($3 * 60))
 long_break=$(($4 * 60))
 
-echo $work $short_break $long_break
+
+send_notification(){
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        notify-send "Pomodoro" $1
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        osascript -e 'display notification "'"$1"'" with title "Pomodoro"'
+    else
+        echo "OS not supported"
+        exit 1
+    fi
+}
 
 short_break_run(){
-    sleep $work && notify-send "Pomodoro Timer" "Break time (short break)"
-    sleep $short_break && notify-send "Pomodoro Timer" "Back to work"
+    sleep $work && send_notification "Break time (short break)"
+    sleep $short_break && send_notification "Back to work"
 }
 
 long_break_run(){
-    sleep $work && notify-send "Pomodoro Timer" "Break time (long break)"
-    sleep $long_break && notify-send "Pomodoro Timer" "Run finished"
+    sleep $work && send_notification "Break time (long break)"
+    sleep $long_break && send_notification "Run finished"
 }
 
 pomodoro_cycle(){
-    # Notify the user that the timer is starting
-    notify-send "Pomodoro Timer" "Starting pomodoro timer"
+    echo "Work time: ${work}m Break time: ${short_break}m Long Break time: ${long_break}m"
+
+    send_notification "Work time: ${work}m Break time: ${short_break}m Long Break time: ${long_break}m"
 
     # Start the pomodoro cycle
     for i in {1..3}
